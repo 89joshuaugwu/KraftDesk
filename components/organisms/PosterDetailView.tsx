@@ -15,14 +15,6 @@ import { canReview, isAdmin, useUserRole } from "@/lib/roles";
 import { validateFileForUpload, uploadToCloudinary } from "@/lib/cloudinary";
 import type { Poster } from "@/types/poster";
 
-// IMPORTANT: even though the Firestore /posters/{id} doc technically carries
-// a `secureUrl` field readable by any client (Firestore rules gate posters
-// at the application layer, not the field layer — see CONTEXT.md Section 5
-// and the Firestore rules), this component never renders that raw field.
-// The image tag always uses `previewUrl`. The clean, un-watermarked file is
-// only ever fetched on demand through the role-gated
-// /api/posters/[id]/download route, which re-checks ownership/role
-// server-side before returning anything.
 export function PosterDetailView({ posterId }: { posterId: string }) {
   const { user, role } = useUserRole();
   const [poster, setPoster] = useState<Poster | null>(null);
@@ -41,7 +33,11 @@ export function PosterDetailView({ posterId }: { posterId: string }) {
   }, [posterId]);
 
   if (!poster || !user) {
-    return <div className="mx-auto max-w-2xl px-4 py-10"><div className="skeleton h-96 w-full" /></div>;
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-10">
+        <div className="skeleton h-96 w-full" />
+      </div>
+    );
   }
 
   const isOwner = poster.uploadedBy === user.uid;
@@ -115,7 +111,7 @@ export function PosterDetailView({ posterId }: { posterId: string }) {
       }).catch(() => {});
 
       toast.success("New version submitted for review.");
-    } catch {
+    } catch (e) {
       toast.error("Couldn't upload the new version.");
     } finally {
       setUploadingVersion(false);
@@ -185,9 +181,9 @@ export function PosterDetailView({ posterId }: { posterId: string }) {
       </div>
 
       {isOwner && poster.status === "changes_requested" && (
-        <label className="mt-4 flex min-h-[48px] cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-kraft-tan bg-warm-white text-sm font-medium text-kraft-b[...]
+        <label className="mt-4 flex min-h-[48px] cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-kraft-tan bg-warm-white text-sm font-medium text-kraft-brown">
           <UploadCloud className="h-4 w-4" />
-          {uploadingVersion ? "Uploading…" : "Upload new version"}
+          {uploadingVersion ? "Uploading..." : "Upload new version"}
           <input
             type="file"
             className="hidden"
