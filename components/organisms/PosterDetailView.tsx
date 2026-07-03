@@ -29,7 +29,7 @@ export function PosterDetailView({ posterId }: { posterId: string }) {
   const [previewOverride, setPreviewOverride] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [uploadingVersion, setUploadingVersion] = useState(false);
-+  const [publishing, setPublishing] = useState(false);
+  const [publishing, setPublishing] = useState(false);
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "posters", posterId), (snap) => {
@@ -123,39 +123,98 @@ export function PosterDetailView({ posterId }: { posterId: string }) {
   }
 
   async function handlePublish() {
-+    if (!confirm("Publish this poster to the public gallery? This will make it visible to everyone.")) return;
-+    setPublishing(true);
-     const idToken = await auth.currentUser?.getIdToken();
-     const res = await fetch(`/api/posters/${posterId}/status`, {
-       method: "POST",
-       headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
-       body: JSON.stringify({ status: "published" }),
-     });
--    if (res.ok) toast.success("Published to gallery!");
--    else toast.error("Couldn't publish.");
-+    if (res.ok) toast.success("Published to gallery!");
-+    else toast.error("Couldn't publish.");
-+    setPublishing(false);
-   }
+    if (!confirm("Publish this poster to the public gallery? This will make it visible to everyone.")) return;
+    setPublishing(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const res = await fetch(`/api/posters/${posterId}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ status: "published" }),
+      });
+      if (res.ok) toast.success("Published to gallery!");
+      else toast.error("Couldn't publish.");
+    } catch (err: any) {
+      toast.error(err?.message || "Couldn't publish.");
+    } finally {
+      setPublishing(false);
+    }
+  }
 
-   return (
-     <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
-       <div className="flex items-start justify-between gap-3">
-         <h1 className="text-xl font-bold text-deep-kraft">{poster.title}</h1>
-         <StatusBadge status={poster.status} />
-       </div>
-@@
--        {isAdmin(role) && poster.status === "approved" && (
--          <Button variant="success" onClick={handlePublish}>
--            Publish to gallery
--          </Button>
--        )}
-+        {poster.status === "approved" && (isAdmin(role) || isOwner) && (
-+          <Button variant="success" onClick={handlePublish} loading={publishing}>
-+            Publish to gallery
-+          </Button>
-+        )}
-       </div>
-@@
-   );
- }
+  return (
+    <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
+      <div className="flex items-start justify-between gap-3">
+        <h1 className="text-xl font-bold text-deep-kraft">{poster.title}</h1>
+        <StatusBadge status={poster.status} />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="mt-4 overflow-hidden rounded-lg border border-kraft-tan bg-warm-white"
+      >
+        <img
+          src={previewOverride ?? poster.previewUrl}
+          alt={poster.title}
+          className="w-full object-contain"
+        />
+      </motion.div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        {poster.tags.map((t) => (
+          <span key={t} className="rounded-full bg-kraft-tan/50 px-2.5 py-1 text-xs text-deep-kraft">
+            {t}
+          </span>
+        ))}
+      </div>
+
+      <div className="mt-3 flex gap-2">
+        {canDownload && (
+          <Button variant="secondary" onClick={handleDownload} loading={downloading}>
+            <Download className="h-4 w-4" /> Download original
+          </Button>
+        )}
+        {poster.status === "draft" && isOwner && (
+          <Button onClick={handleSubmitFromDraft}>Submit for review</Button>
+        )}
+        {poster.status === "approved" && (isAdmin(role) || isOwner) && (
+          <Button variant="success" onClick={handlePublish} loading={publishing}>
+            Publish to gallery
+          </Button>
+        )}
+      </div>
+
+      {isOwner && poster.status === "changes_requested" && (
+        <label className="mt-4 flex min-h-[48px] cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-kraft-tan bg-warm-white text-sm font-medium text-kraft-b[...]
+          <UploadCloud className="h-4 w-4" />
+          {uploadingVersion ? "Uploading…" : "Upload new version"}
+          <input
+            type="file"
+            className="hidden"
+            accept="image/jpeg,image/png,image/webp,application/pdf"
+            disabled={uploadingVersion}
+            onChange={(e) => e.target.files?.[0] && handleNewVersionUpload(e.target.files[0])}
+          />
+        </label>
+      )}
+
+      <div className="mt-6">
+        <VersionHistory
+          posterId={posterId}
+          currentVersion={poster.currentVersion}
+          onPreview={(url) => setPreviewOverride(url)}
+        />
+      </div>
+
+      <div className="mt-6">
+        <CommentThread posterId={posterId} />
+      </div>
+
+      {isReviewer && poster.status === "pending" && (
+        <div className="mt-6">
+          <ReviewActionBar posterId={posterId} onDone={() => {}} />
+        </div>
+      )}
+    </div>
+  );
+}
