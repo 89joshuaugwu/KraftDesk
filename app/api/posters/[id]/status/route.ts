@@ -63,12 +63,29 @@ export async function POST(
     return Response.json({ error: "Unsupported status transition" }, { status: 400 });
   }
 
-  await posterRef.update({
+  // Build the update payload. If publishing, also compute a clean previewUrl
+  // (remove watermark) so the public gallery shows an un-watermarked image.
+  const updatePayload: Record<string, any> = {
     status,
     reviewedBy: status === "published" ? poster.reviewedBy ?? null : uid,
     updatedAt: Date.now(),
     ...(status === "published" ? { publishedAt: Date.now() } : {}),
-  });
+  };
+
+  if (status === "published") {
+    try {
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      if (cloudName && poster.cloudinaryPublicId) {
+        const base = `https://res.cloudinary.com/${cloudName}/image/upload`;
+        const optimize = "q_auto,f_auto,w_1200";
+        updatePayload.previewUrl = `${base}/${optimize}/${poster.cloudinaryPublicId}`;
+      }
+    } catch (e) {
+      // don't block publishing if we can't compute previewUrl; fallback to leaving it as-is
+    }
+  }
+
+  await posterRef.update(updatePayload);
 
   if (commentText?.trim()) {
     await posterRef.collection("comments").add({
