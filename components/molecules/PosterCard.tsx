@@ -6,6 +6,12 @@ import { Card } from "@/components/ui/Card";
 import type { Poster } from "@/types/poster";
 
 export function PosterCard({ poster }: { poster: Poster }) {
+  const updatedAt = (() => {
+    if (poster.updatedAt == null) return null;
+    const d = new Date(poster.updatedAt as any);
+    return isNaN(d.getTime()) ? null : d;
+  })();
+
   return (
     <Link href={`/dashboard/posters/${poster.id}`}>
       <Card className="overflow-hidden">
@@ -25,7 +31,7 @@ export function PosterCard({ poster }: { poster: Poster }) {
           <div className="mt-1.5 flex items-center justify-between gap-2">
             <StatusBadge status={poster.status} />
             <span className="text-xs text-warm-gray">
-              {formatDistanceToNow(new Date(poster.updatedAt), { addSuffix: true })}
+              {updatedAt ? formatDistanceToNow(updatedAt, { addSuffix: true }) : ""}
             </span>
           </div>
         </div>
