@@ -1,17 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import { formatDistanceToNow } from "date-fns";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Card } from "@/components/ui/Card";
+import { safeFormatDistanceToNow } from "@/lib/date";
 import type { Poster } from "@/types/poster";
 
 export function PosterCard({ poster }: { poster: Poster }) {
-  const updatedAt = (() => {
-    if (poster.updatedAt == null) return null;
-    const d = new Date(poster.updatedAt as any);
-    return isNaN(d.getTime()) ? null : d;
-  })();
-
   return (
     <Link href={`/dashboard/posters/${poster.id}`}>
       <Card className="overflow-hidden">
@@ -31,7 +25,7 @@ export function PosterCard({ poster }: { poster: Poster }) {
           <div className="mt-1.5 flex items-center justify-between gap-2">
             <StatusBadge status={poster.status} />
             <span className="text-xs text-warm-gray">
-              {updatedAt ? formatDistanceToNow(updatedAt, { addSuffix: true }) : ""}
+              {safeFormatDistanceToNow(poster.updatedAt)}
             </span>
           </div>
         </div>

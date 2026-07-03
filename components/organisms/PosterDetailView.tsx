@@ -45,6 +45,7 @@ export function PosterDetailView({ posterId }: { posterId: string }) {
   const canDownload = isOwner || isReviewer;
 
   async function handleDownload() {
+    if (!poster) return;
     setDownloading(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
@@ -53,7 +54,34 @@ export function PosterDetailView({ posterId }: { posterId: string }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      window.open(data.secureUrl, "_blank");
+
+      // In-page quick download (no new tab). Fetch the file as a blob and
+      // trigger a download with the poster's title as the filename, instead
+      // of window.open()-ing the raw Cloudinary URL.
+      const fileRes = await fetch(data.secureUrl);
+      if (!fileRes.ok) throw new Error("Couldn't fetch the file for download.");
+      const blob = await fileRes.blob();
+
+      let ext = "";
+      const m = (data.secureUrl as string).match(/\.(png|jpg|jpeg|webp|pdf)(\?|$)/i);
+      if (m) ext = m[1].toLowerCase() === "jpeg" ? "jpg" : m[1].toLowerCase();
+      else if (blob.type === "image/png") ext = "png";
+      else if (blob.type === "image/jpeg") ext = "jpg";
+      else if (blob.type === "image/webp") ext = "webp";
+      else if (blob.type === "application/pdf") ext = "pdf";
+      else ext = "png";
+
+      const safeName = poster.title.replace(/[^a-z0-9_\- ]/gi, "").trim().replace(/\s+/g, "_") || "poster";
+      const filename = `${safeName}.${ext}`;
+
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
     } catch (err: any) {
       toast.error(err.message || "Couldn't download this poster.");
     } finally {

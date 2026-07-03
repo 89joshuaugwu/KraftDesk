@@ -31,9 +31,21 @@ service cloud.firestore {
 
       // Updates:
       // - reviewers and admins may perform review transitions (approved/changes_requested/rejected)
-      // - uploader (owner) may update their own poster but must NOT set status to "published" from the client
+      //   but may NOT set status to "published" directly — publish must go through
+      //   /api/posters/[id]/status so the clean (un-watermarked) previewUrl gets
+      //   recomputed atomically with the status change. Skipping the server route
+      //   leaves previewUrl pointing at the watermarked transform.
+      // - uploader (owner) may update their own poster but must NOT set status to
+      //   "published" from the client either — same reasoning applies to the
+      //   uploader-publishes-after-approval flow.
       allow update: if request.auth != null && (
-        getRole() in ["reviewer", "admin"]
+        (
+          getRole() in ["reviewer", "admin"]
+          && (
+            request.resource.data.status == resource.data.status
+            || request.resource.data.status in ["approved", "changes_requested", "rejected"]
+          )
+        )
         || (
           request.auth.uid == resource.data.uploadedBy
           && (

@@ -3,26 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { collection, query, where, orderBy, onSnapshot, doc, getDoc, limit as fbLimit } from "firebase/firestore";
-import { formatDistanceToNow } from "date-fns";
 import { ClipboardList } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SkeletonCard } from "@/components/ui/Spinner";
+import { safeFormatDistanceToNow } from "@/lib/date";
 import type { Poster } from "@/types/poster";
 
 interface QueueRow extends Poster {
   designerName?: string;
-}
-
-function safeFormatDistanceToNow(value?: unknown) {
-  if (value == null) return "";
-  try {
-    const d = new Date(value as any);
-    if (isNaN(d.getTime())) return "";
-    return formatDistanceToNow(d, { addSuffix: true });
-  } catch (e) {
-    return "";
-  }
 }
 
 // preview=true renders the top-3 Home widget (Phase 2); preview=false is the

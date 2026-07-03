@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Bell, CheckCircle2, AlertTriangle, XCircle, MessageCircle, CircleDot } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useNotifications, markAsRead } from "@/lib/notifications";
+import { safeFormatDistanceToNow } from "@/lib/date";
 import type { NotificationType } from "@/types/notification";
 
 const ICONS: Record<NotificationType, React.ReactNode> = {
@@ -66,9 +66,7 @@ export function NotificationBell({ uid }: { uid: string | null }) {
                       {n.message}
                     </span>
                     <span className="text-xs text-warm-gray">
-                      {n.createdAt
-                        ? formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })
-                        : ""}
+                      {safeFormatDistanceToNow(n.createdAt)}
                     </span>
                   </span>
                 </button>

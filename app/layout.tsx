@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   title: "KraftDesk — From Draft to Published. Tracked.",
   description:
     "Poster design workflow for teams — upload, review, approve, distribute.",
+  icons: {
+    icon: "/kraftdesk-logo.svg",
+    shortcut: "/kraftdesk-logo.svg",
+    apple: "/kraftdesk-logo.svg",
+  },
 };
 
 export const viewport: Viewport = {
