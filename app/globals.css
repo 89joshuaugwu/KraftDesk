@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@theme {
+  /* Kraft palette — light mode only, per DESIGN.md Section 1 */
+  --color-kraft-brown: #8b5e34;
+  --color-deep-kraft: #5c3d1f;
+  --color-terracotta: #c2571b;
+  --color-forest-green: #15803d;
+  --color-amber: #d97706;
+  --color-rust-red: #dc2626;
+  --color-cream: #faf6ef;
+  --color-warm-white: #ffffff;
+  --color-kraft-tan: #e5d9c3;
+  --color-charcoal: #292524;
+  --color-warm-gray: #78716c;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: light only;
+}
+
+html {
+  background: var(--color-cream);
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+* {
+  border-color: var(--color-kraft-tan);
+}
+
+/* Visible focus ring everywhere, per DESIGN.md Section 8 accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-terracotta);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Kraft Tan skeleton pulse, per DESIGN.md Section 9 */
+@keyframes kraft-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+.skeleton {
+  background: var(--color-kraft-tan);
+  animation: kraft-pulse 1.6s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
+/* Hide scrollbars on horizontal chip/timeline rows without losing scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
