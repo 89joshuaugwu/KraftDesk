@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { RoleBadge } from "@/components/molecules/RoleBadge";
 import type { PosterComment } from "@/types/poster";
+import { safeFormatDistanceToNow } from "@/lib/date";
 
 export function CommentThread({ posterId }: { posterId: string }) {
   const [comments, setComments] = useState<PosterComment[]>([]);
@@ -68,7 +69,7 @@ export function CommentThread({ posterId }: { posterId: string }) {
               <div className="flex items-center gap-2">
                 <RoleBadge role={c.authorRole} />
                 <span className="text-xs text-warm-gray">
-                  {c.createdAt ? formatDistanceToNow(new Date(c.createdAt), { addSuffix: true }) : ""}
+                  {safeFormatDistanceToNow(c.createdAt)}
                 </span>
               </div>
               <p className="mt-1.5 text-sm text-charcoal">{c.text}</p>
