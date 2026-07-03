@@ -14,6 +14,17 @@ interface QueueRow extends Poster {
   designerName?: string;
 }
 
+function safeFormatDistanceToNow(value?: unknown) {
+  if (value == null) return "";
+  try {
+    const d = new Date(value as any);
+    if (isNaN(d.getTime())) return "";
+    return formatDistanceToNow(d, { addSuffix: true });
+  } catch (e) {
+    return "";
+  }
+}
+
 // preview=true renders the top-3 Home widget (Phase 2); preview=false is the
 // full /dashboard/queue list (Phase 5).
 export function ReviewerQueue({ preview = false }: { preview?: boolean }) {
@@ -78,8 +89,7 @@ export function ReviewerQueue({ preview = false }: { preview?: boolean }) {
           <div className="min-w-0 flex-1">
             <p className="truncate font-semibold text-charcoal">{p.title}</p>
             <p className="text-xs text-warm-gray">
-              {p.designerName} · submitted{" "}
-              {p.createdAt ? formatDistanceToNow(new Date(p.createdAt), { addSuffix: true }) : ""}
+              {p.designerName} · submitted {safeFormatDistanceToNow(p.createdAt)}
             </p>
           </div>
         </Link>
