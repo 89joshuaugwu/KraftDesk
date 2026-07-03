@@ -42,10 +42,12 @@ export async function POST(
   const isAdminOnly = role === "admin";
 
   if (status === "published") {
-    // Publish to gallery is an admin-only manual action, per DESIGN.md
-    // Section 7 / PROMPT.md Phase 7.
-    if (!isAdminOnly) {
-      return Response.json({ error: "Admin only" }, { status: 403 });
+    // Allow publish if:
+    // - caller is admin OR
+    // - caller is the uploader AND the poster is already approved
+    const canUploaderPublish = poster.uploadedBy === uid && poster.status === "approved";
+    if (!(isAdminOnly || canUploaderPublish)) {
+      return Response.json({ error: "Admin only or uploader-only after approval" }, { status: 403 });
     }
   } else if (["approved", "changes_requested", "rejected"].includes(status)) {
     if (!isReviewerOrAdmin) {
@@ -65,6 +67,7 @@ export async function POST(
     status,
     reviewedBy: status === "published" ? poster.reviewedBy ?? null : uid,
     updatedAt: Date.now(),
+    ...(status === "published" ? { publishedAt: Date.now() } : {}),
   });
 
   if (commentText?.trim()) {
@@ -76,9 +79,8 @@ export async function POST(
     });
   }
 
-  if (status !== "published") {
-    await notifyOnStatusChange(id, status, poster.uploadedBy);
-  }
+  // Send notifications for all transitions including published
+  await notifyOnStatusChange(id, status, poster.uploadedBy);
 
   return Response.json({ ok: true });
 }
