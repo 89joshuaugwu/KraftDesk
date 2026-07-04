@@ -12,6 +12,19 @@ Antigravity phase-by-phase.
 
 ---
 
+## Technical & Non-Technical Guides
+
+To help developers, designers, and non-coders understand the mechanics of the project, we have created a set of detailed documentation guides:
+
+1. **[System Architecture & Tech Stack](file:///c:/Users/JOSHUA%20ZAZA/Downloads/kraftdesk/docs/architecture_and_tech_stack.md)**: Conceptual walkthrough of KraftDesk, systems architecture Mermaid diagram, stack details, and directory index.
+2. **[Data Model & Database Architecture](file:///c:/Users/JOSHUA%20ZAZA/Downloads/kraftdesk/docs/database_and_security.md)**: Detailed Firestore database schema description, entity relationships, and line-by-line breakdown of security rules.
+3. **[Authentication & Access Control (RBAC)](file:///c:/Users/JOSHUA%20ZAZA/Downloads/kraftdesk/docs/authentication_and_authorization.md)**: Explanation of signup/login flows, session guards, user hooks, the role permissions matrix, and admin bootstrapping.
+4. **[Cloudinary & Media Lifecycle Management](file:///c:/Users/JOSHUA%20ZAZA/Downloads/kraftdesk/docs/media_and_cloudinary_handling.md)**: Walkthrough of the signed direct upload flow, status-based watermarking, secure download gating, and image optimizations.
+5. **[Page Walkthrough & UX Audit](file:///c:/Users/JOSHUA%20ZAZA/Downloads/kraftdesk/docs/pages_and_features_guide.md)**: Screen-by-screen breakdown of all features, responsive design layouts (mobile tab bar/desktop sidebar), and permissions per page.
+6. **[API Endpoints & Notification System](file:///c:/Users/JOSHUA%20ZAZA/Downloads/kraftdesk/docs/api_reference_and_notifications.md)**: Complete backend API schema reference (payload formats, responses) and notifications fan-out details.
+
+---
+
 ## 1. Local setup
 
 ```bash
